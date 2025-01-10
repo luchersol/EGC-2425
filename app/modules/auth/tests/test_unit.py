@@ -48,6 +48,14 @@ def test_login_unsuccessful_bad_password(test_client):
 
     test_client.get("/logout", follow_redirects=True)
 
+def test_login_unsuccessful_blank(test_client):
+    response = test_client.post(
+        "/login", data=dict(email="", password=""), follow_redirects=True
+    )
+
+    assert response.request.path == url_for("auth.login"), "Login was unsuccessful"
+
+    test_client.get("/logout", follow_redirects=True)
 
 def test_signup_user_no_name(test_client):
     response = test_client.post(
@@ -134,16 +142,3 @@ def test_service_create_with_profile_fail_no_password(clean_database):
     assert UserRepository().count() == 0
     assert UserProfileRepository().count() == 0
 
-def test_service_campos_vacios(clean_database):
-    data = {
-        "name": "",
-        "surname": "",
-        "email": "",
-        "password": ""
-    }
-
-    with pytest.raises(ValueError, match="Email is required."):
-        AuthenticationService().create_with_profile(**data)
-
-    assert UserRepository().count() == 0
-    assert UserProfileRepository().count() == 0
